@@ -10,6 +10,7 @@ from services.memory import (
 )
 
 from services.openrouter import ask_ai
+from services.cache import save_last
 
 from utils.helpers import split_message
 from utils.logger import logger
@@ -27,7 +28,9 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         action=ChatAction.TYPING
     )
 
-    thinking = await update.message.reply_text("🤖 Thinking...")
+    thinking = await update.message.reply_text(
+        "🤖 Thinking..."
+    )
 
     try:
 
@@ -42,6 +45,14 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         answer = await ask_ai(history)
 
+        # Save last prompt for regenerate
+        save_last(
+            user_id,
+            user_message,
+            answer
+        )
+
+        # Save in SQLite
         await save_message(
             user_id,
             "user",
@@ -64,22 +75,31 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for i, part in enumerate(parts):
 
             if i == len(parts) - 1:
+
                 await update.message.reply_text(
                     part,
                     reply_markup=reply_keyboard()
                 )
-            else:
-                await update.message.reply_text(part)
 
-        logger.info(f"[{user_id}] Reply Sent")
+            else:
+
+                await update.message.reply_text(
+                    part
+                )
+
+        logger.info(
+            f"[{user_id}] Reply Sent"
+        )
 
     except Exception as e:
 
         logger.exception(e)
 
         try:
+
             await thinking.edit_text(
                 "❌ Sorry, kuch problem aa gayi.\n\nPlease thodi der baad try karo. 😊"
             )
+
         except Exception:
             pass
