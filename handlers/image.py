@@ -9,7 +9,6 @@ from utils.helpers import split_message
 from utils.logger import logger
 
 TEMP_DIR = "temp"
-
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 
@@ -34,7 +33,6 @@ async def image_handler(
     try:
 
         photo = update.message.photo[-1]
-
         telegram_file = await photo.get_file()
 
         file_path = os.path.join(
@@ -44,20 +42,25 @@ async def image_handler(
 
         await telegram_file.download_to_drive(file_path)
 
+        prompt = update.message.caption
+
+        if not prompt:
+            prompt = (
+                "Describe this image in detail. "
+                "Reply in the same language as the user."
+            )
+
         answer = await ask_image(
             file_path,
-            "Describe this image in detail. Reply in the same language as the user. Use emojis naturally."
+            prompt
         )
 
         try:
             await thinking.delete()
-        except:
+        except Exception:
             pass
 
-        parts = split_message(answer)
-
-        for i, part in enumerate(parts):
-
+        for part in split_message(answer):
             await update.message.reply_text(part)
 
         logger.info(
@@ -69,19 +72,16 @@ async def image_handler(
         logger.exception(e)
 
         try:
-
             await thinking.edit_text(
                 f"❌ Image Analysis Failed\n\n{e}"
             )
-
-        except:
+        except Exception:
             pass
 
     finally:
 
         if file_path and os.path.exists(file_path):
-
             try:
                 os.remove(file_path)
-            except:
+            except Exception:
                 pass
