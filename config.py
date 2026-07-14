@@ -17,7 +17,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 MODEL = os.getenv(
     "MODEL",
-    "openai/gpt-4.1-mini"
+    "deepseek/ deepseek-r1-0528:free"
 )
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
