@@ -48,8 +48,7 @@ async def button_click(update: Update,
     if query.data == "help":
 
         await query.message.reply_text(
-            """
-🤖 RohitAI Help
+            """🤖 RohitAI Help
 
 /start - Start Bot
 /help - Help
@@ -73,7 +72,7 @@ async def button_click(update: Update,
         await clear_history(user_id)
 
         await query.message.reply_text(
-            "🆕 New Chat Started.\nHello! 😊"
+            "🆕 New Chat Started.\n😊 Hello!"
         )
 
     elif query.data == "regen":
@@ -93,4 +92,65 @@ async def button_click(update: Update,
 
         try:
 
-            history = await get
+            history = await get_history(user_id)
+
+            history.append(
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            )
+
+            answer = await ask_ai(history)
+
+            save_last(
+                user_id,
+                prompt,
+                answer
+            )
+
+            await save_message(
+                user_id,
+                "assistant",
+                answer
+            )
+
+            try:
+                await thinking.delete()
+            except:
+                pass
+
+            parts = split_message(answer)
+
+            for i, part in enumerate(parts):
+
+                if i == len(parts) - 1:
+
+                    await query.message.reply_text(
+                        part,
+                        reply_markup=reply_keyboard()
+                    )
+
+                else:
+
+                    await query.message.reply_text(part)
+
+            logger.info(
+                f"[{user_id}] Regenerated Response"
+            )
+
+        except Exception as e:
+
+            logger.exception(e)
+
+            try:
+
+                await thinking.edit_text(
+                    "❌ Regenerate Failed."
+                )
+
+            except:
+
+                await query.message.reply_text(
+                    "❌ Regenerate Failed."
+                )
