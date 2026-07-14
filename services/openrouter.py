@@ -1,6 +1,7 @@
 import base64
 import httpx
 import config
+from services.websearch import web_search
 
 
 SYSTEM_PROMPT = """
