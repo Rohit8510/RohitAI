@@ -124,7 +124,9 @@ async def ask_image(
 
         async with httpx.AsyncClient(
             timeout=config.REQUEST_TIMEOUT
-        ) as client:            response = await client.post(
+        ) as client:
+
+            response = await client.post(
                 config.OPENROUTER_URL,
                 headers=headers,
                 json=payload
