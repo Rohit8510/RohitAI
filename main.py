@@ -1,4 +1,3 @@
-from telegram import Update
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -16,6 +15,7 @@ from handlers.help import help_command
 from handlers.chat import chat
 from handlers.admin import clear, newchat
 from handlers.buttons import button_click
+from handlers.image import image_handler
 
 from utils.logger import logger
 
@@ -55,11 +55,19 @@ def main():
     app.add_handler(CommandHandler("clear", clear))
     app.add_handler(CommandHandler("newchat", newchat))
 
-    # Chat Messages
+    # Text Messages
     app.add_handler(
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             chat
+        )
+    )
+
+    # Photo Messages
+    app.add_handler(
+        MessageHandler(
+            filters.PHOTO,
+            image_handler
         )
     )
 
@@ -74,7 +82,8 @@ def main():
     logger.info("🚀 Polling Started...")
 
     app.run_polling(
-        drop_pending_updates=True
+        drop_pending_updates=True,
+        allowed_updates=Update.ALL_TYPES
     )
 
 
