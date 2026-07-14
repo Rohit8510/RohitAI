@@ -2,6 +2,8 @@ from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ContextTypes
 
+from handlers.buttons import reply_keyboard
+
 from services.memory import (
     get_history,
     save_message,
@@ -25,9 +27,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         action=ChatAction.TYPING
     )
 
-    thinking = await update.message.reply_text(
-        "🤖 Thinking..."
-    )
+    thinking = await update.message.reply_text("🤖 Thinking...")
 
     try:
 
@@ -51,30 +51,25 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await save_message(
             user_id,
             "assistant",
-            answerfor
+            answer
         )
 
         try:
             await thinking.delete()
-        except:
+        except Exception:
             pass
 
-         from handlers.buttons import reply_keyboard
+        parts = split_message(answer)
 
-parts = split_message(answer)
+        for i, part in enumerate(parts):
 
-for i, part in enumerate(parts):
-
-    if i == len(parts) - 1:
-
-        await update.message.reply_text(
-            part,
-            reply_markup=reply_keyboard()
-        )
-
-    else:
-
-        await update.message.reply_text(part)
+            if i == len(parts) - 1:
+                await update.message.reply_text(
+                    part,
+                    reply_markup=reply_keyboard()
+                )
+            else:
+                await update.message.reply_text(part)
 
         logger.info(f"[{user_id}] Reply Sent")
 
@@ -86,5 +81,5 @@ for i, part in enumerate(parts):
             await thinking.edit_text(
                 "❌ Sorry, kuch problem aa gayi.\n\nPlease thodi der baad try karo. 😊"
             )
-        except:
+        except Exception:
             pass
