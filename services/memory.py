@@ -8,7 +8,7 @@ async def save_message(user_id: int, role: str, message: str):
 
         await db.execute(
             """
-            INSERT INTO memory(user_id, role, message)
+            INSERT INTO memory (user_id, role, message)
             VALUES (?, ?, ?)
             """,
             (user_id, role, message),
@@ -25,7 +25,7 @@ async def get_history(user_id: int):
             """
             SELECT role, message
             FROM memory
-            WHERE user_id=?
+            WHERE user_id = ?
             ORDER BY id DESC
             LIMIT ?
             """,
@@ -54,7 +54,10 @@ async def clear_history(user_id: int):
     async with aiosqlite.connect(config.DATABASE_PATH) as db:
 
         await db.execute(
-            "DELETE FROM memory WHERE user_id=?",
+            """
+            DELETE FROM memory
+            WHERE user_id = ?
+            """,
             (user_id,),
         )
 
