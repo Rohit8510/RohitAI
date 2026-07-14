@@ -51,7 +51,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await save_message(
             user_id,
             "assistant",
-            answer
+            answerfor
         )
 
         try:
@@ -59,8 +59,22 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             pass
 
-        for part in split_message(answer):
-            await update.message.reply_text(part)
+         from handlers.buttons import reply_keyboard
+
+parts = split_message(answer)
+
+for i, part in enumerate(parts):
+
+    if i == len(parts) - 1:
+
+        await update.message.reply_text(
+            part,
+            reply_markup=reply_keyboard()
+        )
+
+    else:
+
+        await update.message.reply_text(part)
 
         logger.info(f"[{user_id}] Reply Sent")
 
