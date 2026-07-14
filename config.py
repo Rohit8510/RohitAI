@@ -17,7 +17,13 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 MODEL = os.getenv(
     "MODEL",
-    "deepseek/ deepseek-r1-0528:free"
+    "deepseek/deepseek-r1-0528:free"
+)
+
+# AI Image Model
+IMAGE_MODEL = os.getenv(
+    "IMAGE_MODEL",
+    "openai/gpt-image-1"
 )
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -43,6 +49,7 @@ REQUEST_TIMEOUT = 60
 
 ENABLE_MEMORY = True
 ENABLE_IMAGE_ANALYSIS = True
+ENABLE_IMAGE_GENERATION = True
 ENABLE_WEB_SEARCH = True
 ENABLE_STREAMING = False
 
