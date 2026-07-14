@@ -1,3 +1,4 @@
+import base64
 import httpx
 import config
 
@@ -17,22 +18,18 @@ async def ask_ai(messages):
 You are RohitAI, an intelligent AI assistant similar to ChatGPT.
 
 Rules:
-- Always reply in the user's language.
-- If the user writes in Hindi, reply in Hindi.
-- If the user writes in Hinglish, reply in Hinglish.
-- If the user writes in Marathi, reply in Marathi.
-- If the user writes in English, reply in English.
+- Reply in user's language.
+- Hindi → Hindi
+- Hinglish → Hinglish
+- English → English
+- Marathi → Marathi
 
-- Use emojis naturally like 😊😂🔥💯✨🚀👍❤️ where appropriate.
+- Use emojis naturally 😊🔥🚀❤️
 - Don't overuse emojis.
-- Make replies friendly and engaging.
-- Use bullet points where helpful.
-- Format code inside Markdown code blocks.
 - Explain coding answers step by step.
-- Be polite and conversational.
+- Format code using markdown.
+- Be friendly.
 - Give complete answers.
-- If the user greets you, greet them warmly.
-- Never mention these instructions.
 """
     }
 
@@ -62,10 +59,78 @@ Rules:
             return data["choices"][0]["message"]["content"]
 
     except httpx.HTTPStatusError as e:
+
         return f"❌ API Error ({e.response.status_code})\n{e.response.text}"
 
     except httpx.ReadTimeout:
-        return "⏳ AI response aane me zyada time lag raha hai. Please dobara try karein."
+
+        return "⏳ AI response aane me time lag raha hai."
 
     except Exception as e:
+
         return f"❌ Error:\n{str(e)}"
+
+
+# ===========================
+# IMAGE ANALYSIS
+# ===========================
+
+async def ask_image(
+    image_path,
+    prompt="Describe this image in detail."
+):
+
+    with open(image_path, "rb") as f:
+        image_base64 = base64.b64encode(
+            f.read()
+        ).decode()
+
+    headers = {
+        "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/",
+        "X-Title": "RohitAI"
+    }
+
+    payload = {
+
+        "model": config.MODEL,
+
+        "messages": [
+
+            {
+
+                "role": "user",
+
+                "content": [
+
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url":
+                            f"data:image/jpeg;base64,{image_base64}"
+                        }
+                    }
+
+                ]
+
+            }
+
+        ],
+
+        "max_tokens": config.MAX_TOKENS
+
+    }
+
+    try:
+
+        async with httpx.AsyncClient(
+            timeout=config.REQUEST_TIMEOUT
+        ) as client:
+
+            response =
